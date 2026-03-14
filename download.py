@@ -5,10 +5,12 @@ from os import listdir
 from itertools import chain
 import re
 from pathlib import Path
+import gzip
 
 
 requests = LimiterSession(per_second=1)
-
+rauwfolder = Path("./data/rauw/")
+rauwfolder.mkdir(parents=True, exist_ok=True)
 
 def getlaatste() -> int:
 
@@ -22,16 +24,13 @@ def getlaatste() -> int:
     return int(r)
 
 
-rauwfolder = Path("./data/rauw/")
-rauwfolder.mkdir(parents=True, exist_ok=True)
-
 def getstate() -> tuple[int, int] | None:
     try:
         files = listdir(rauwfolder)
         if not files:
             return None
 
-        filenummers = [ int(f.removesuffix(".html")) for f in files ]
+        filenummers = [ int(f.removesuffix(".html.gzip")) for f in files ]
         mx = max(filenummers)
         mn = min(filenummers)
 
@@ -62,14 +61,19 @@ def download(num):
 
     if r.status_code == 200:
         print(num, 200, "opslaan")
-        with open(rauwfolder / (num + ".html"), "w") as f:
+        with gzip.open(rauwfolder / (num + ".html.gzip"), "wt", encoding="utf-8") as f:
             f.write(r.text)
     elif r.status_code == 404:
         print(num, 404, "overslaan")
+    elif r.status_code == 410:
+        print(num, 410, "niet langer beschikbaar")
     else:
         print(num, r.status_code, "niet bekende statuscode")
         exit()
 
+
+#with gzip.open(rauwfolder / ("2605906" + ".html.gzip"), "rt", encoding="utf-8") as f:
+#    print(f.read())
 
 
 todownload = opdrachtgen()
