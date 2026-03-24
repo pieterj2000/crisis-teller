@@ -27,7 +27,9 @@ def getrauwpaginas() -> list[int]:
         
         return filenummers
 
-    except:
+    except Exception as e:
+        print(e)
+        print("returning []")
         return []
 
 
@@ -41,6 +43,7 @@ def getvantype(type: str) -> list[int]:
         return getallen
     except Exception as e:
         print(e)
+        print("returning []")
         return []
     
 

@@ -39,7 +39,9 @@ def getstate() -> tuple[int, int] | None:
 
         return (mn, mx)
 
-    except:
+    except Exception as e:
+        print(e)
+        print("returning None")
         return None
 
 def getopenliveblogs() -> list[int]:
@@ -49,6 +51,7 @@ def getopenliveblogs() -> list[int]:
         return getallen
     except Exception as e:
         print(e)
+        print("returning []")
         return []
 
 
