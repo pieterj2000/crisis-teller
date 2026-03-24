@@ -79,6 +79,12 @@ def download(num):
 
     if r.status_code == 200:
         print(num, 200, "opslaan")
+        if (r.text == ""):
+            print("response leeg")
+            print("opnieuw proberen in 1 minuut")
+            time.sleep(60)
+            download(num)
+
         with gzip.open(rauwfolder / (num + ".html.gzip"), "wt", encoding="utf-8") as f:
             f.write(r.text)
     elif r.status_code == 404:
