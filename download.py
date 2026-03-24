@@ -12,6 +12,8 @@ import time
 requests = LimiterSession(per_second=1)
 rauwfolder = Path("./data/rauw/")
 rauwfolder.mkdir(parents=True, exist_ok=True)
+analysefolder = Path("./data/types/")
+analysefolder.mkdir(parents=True, exist_ok=True)
 
 def getlaatste() -> int:
 
@@ -40,18 +42,30 @@ def getstate() -> tuple[int, int] | None:
     except:
         return None
 
+def getopenliveblogs() -> list[int]:
+    try:
+        with open(analysefolder / "liveblog_open", "rt", encoding="utf-8") as f:
+            getallen = [ int(line.strip()) for line in f if line.strip() ]
+        return getallen
+    except Exception as e:
+        print(e)
+        return []
+
 
 def opdrachtgen():
     s = getstate()
     laatste = getlaatste()
     eerste = 0
+
+    openliveblogs = getopenliveblogs()
+
     if s is None:
         return reversed(range(eerste, laatste+1))
     else:
         (mn, mx) = s
         nieuwe = range(mx+1, laatste+1)
         oude = reversed(range(eerste, mn))
-        return chain(nieuwe, oude)
+        return chain(openliveblogs, nieuwe, oude)
 
 
 
