@@ -6,6 +6,7 @@ from itertools import chain
 import re
 from pathlib import Path
 import gzip
+import time
 
 
 requests = LimiterSession(per_second=1)
@@ -67,6 +68,11 @@ def download(num):
         print(num, 404, "overslaan")
     elif r.status_code == 410:
         print(num, 410, "niet langer beschikbaar")
+    elif r.status_code == 502:
+        print(num, 502, "bad gateway")
+        print("opnieuw proberen in 1 minuut")
+        time.sleep(60)
+        download(num)
     else:
         print(num, r.status_code, "niet bekende statuscode")
         exit()
