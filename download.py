@@ -71,9 +71,7 @@ def opdrachtgen():
         return chain(openliveblogs, nieuwe, oude)
 
 
-tryagainMax = 3
-tryagain = tryagainMax
-def download(num):
+def download(num, tryagain = 3):
     num = str(num)
     r = requests.get("https://nos.nl/artikel/" + num)
 
@@ -101,11 +99,9 @@ def download(num):
         if tryagain > 0:
             print("opnieuw proberen in 1 minuut")
             time.sleep(60)
-            tryagain -= 1 
-            download(num)
+            download(num, tryagain - 1)
         else:
             print("ik geef het op")
-            tryagain = tryagainMax
     else:
         print(num, r.status_code, "niet bekende statuscode")
         exit()
