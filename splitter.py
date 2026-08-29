@@ -28,6 +28,7 @@ def getrauwpaginas() -> list[int]:
         return filenummers
 
     except Exception as e:
+        print("getrauwpaginas()")
         print(e)
         print("returning []")
         return []

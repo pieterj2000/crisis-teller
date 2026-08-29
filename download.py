@@ -10,6 +10,12 @@ import time
 
 
 requests = LimiterSession(per_second=0.5)
+requests.proxies.update({
+    "http": "socks5h://127.0.0.1:9050",
+    "https": "socks5h://127.0.0.1:9050",
+})
+
+
 rauwfolder = Path("./data/rauw/")
 rauwfolder.mkdir(parents=True, exist_ok=True)
 analysefolder = Path("./data/types/")
