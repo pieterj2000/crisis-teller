@@ -9,7 +9,7 @@ import gzip
 import time
 
 
-requests = LimiterSession(per_second=1)
+requests = LimiterSession(per_second=0.5)
 rauwfolder = Path("./data/rauw/")
 rauwfolder.mkdir(parents=True, exist_ok=True)
 analysefolder = Path("./data/types/")
