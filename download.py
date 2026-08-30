@@ -89,6 +89,8 @@ def download(num, tryagain = 3):
             print(e)
             print(f"poging {i} gefaalt, opnieuw in 2 minuten")
             time.sleep(60*2)
+        print("10 keer gefaalt, we kappen er mee :)")
+        exit()
             
 
     if r.status_code == 200:
