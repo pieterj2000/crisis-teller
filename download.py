@@ -79,7 +79,17 @@ def opdrachtgen():
 
 def download(num, tryagain = 3):
     num = str(num)
-    r = requests.get("https://nos.nl/artikel/" + num)
+
+    r = None
+    for i in range(10):
+        try:
+            r = requests.get("https://nos.nl/artikel/" + num)
+            break
+        except Exception as e:
+            print(e)
+            print(f"poging {i} gefaalt, opnieuw in 2 minuten")
+            time.sleep(60*2)
+            
 
     if r.status_code == 200:
         print(num, 200, "opslaan")
