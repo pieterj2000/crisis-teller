@@ -33,22 +33,34 @@ def getlaatste() -> int:
     return int(r)
 
 
-def getstate() -> tuple[int, int] | None:
+def getdownloaded() -> set[int]:
     try:
         files = listdir(rauwfolder)
         if not files:
-            return None
+            return set()
 
-        filenummers = [ int(f.removesuffix(".html.gzip")) for f in files ]
-        mx = max(filenummers)
-        mn = min(filenummers)
-
-        return (mn, mx)
+        filenummers = { int(f.removesuffix(".html.gzip")) for f in files }
+        return filenummers
 
     except Exception as e:
         print(e)
-        print("returning None")
-        return None
+        print("returning set()")
+        return set()
+
+def geterrors() -> set[int]:
+    try:
+        error_set = set()
+        p = analysefolder / "errorpaginas"
+        if p.exists():
+            with open(p, "rt", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        error_set.add(int(line.strip()))
+        return error_set
+    except Exception as e:
+        print(e)
+        print("returning set()")
+        return set()
 
 def getopenliveblogs() -> list[int]:
     try:
@@ -62,19 +74,18 @@ def getopenliveblogs() -> list[int]:
 
 
 def opdrachtgen():
-    s = getstate()
     laatste = getlaatste()
+    downloaded = getdownloaded()
+    errors = geterrors()
     eerste = 0
 
     openliveblogs = getopenliveblogs()
 
-    if s is None:
-        return reversed(range(eerste, laatste+1))
-    else:
-        (mn, mx) = s
-        nieuwe = range(mx+1, laatste+1)
-        oude = reversed(range(eerste, mn))
-        return chain(openliveblogs, nieuwe, oude)
+    excluded = downloaded | errors
+
+    todo = [x for x in range(eerste, laatste + 1) if x not in excluded]
+
+    return chain(openliveblogs, todo)
 
 
 def download(num, tryagain = 3):
@@ -106,8 +117,12 @@ def download(num, tryagain = 3):
             f.write(r.text)
     elif r.status_code == 404:
         print(num, 404, "overslaan")
+        with open(analysefolder / "errorpaginas", "at", encoding="utf-8") as f:
+            f.write(str(num) + "\n")
     elif r.status_code == 410:
         print(num, 410, "niet langer beschikbaar")
+        with open(analysefolder / "errorpaginas", "at", encoding="utf-8") as f:
+            f.write(str(num) + "\n")
     elif r.status_code == 502:
         print(num, 502, "bad gateway")
         print("opnieuw proberen in 1 minuut")
