@@ -35,7 +35,7 @@ def main():
                     break
             
             if not found:
-                print(f"Warning: File for argument '{arg}' not found in {rauw_dir}", file=sys.stderr)
+                print(f"Warning: File for argument '{arg}' not found in {rauw_dir}")
 
     if not source_files:
         print("No valid source files to decompress.")
