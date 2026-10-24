@@ -9,6 +9,7 @@ def main():
     ongzip_dir.mkdir(parents=True, exist_ok=True)
 
     args = sys.argv[1:]
+    skip_existing = not args
 
     if not args:
         # Decompress all files in data/rauw/
@@ -49,6 +50,10 @@ def main():
         filename = src_path.name
         dest_filename = filename[:-5]
         dest_path = ongzip_dir / dest_filename
+
+        if skip_existing and dest_path.exists():
+            print(f"Skipped {src_path}, output {dest_path} already exists")
+            continue
 
         try:
             with gzip.open(src_path, "rb") as f_in:
