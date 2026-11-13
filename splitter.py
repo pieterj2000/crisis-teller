@@ -124,8 +124,8 @@ i = 0
 for artnum in allestodo:
     process(artnum)
     i += 1
-    if i > 10:
-        exit()
+#    if i > 10:
+#        exit()
 
 
 
