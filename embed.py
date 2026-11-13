@@ -77,7 +77,7 @@ def main():
         print(f"Error initializing SQLite database: {e}")
         return
     
-    batch_size = 1000
+    batch_size = 1000 if torch.cuda.is_available() else 10
     success_count = 0
 
     print(f"Processing {len(source_files)} source files in batches of up to {batch_size}...")
