@@ -52,7 +52,7 @@ def main():
     model_name = "clips/e5-base-trm-nl"
     print(f"Loading SentenceTransformer model for {model_name}...")
     try:
-        if torch.cuda.is_available()
+        if torch.cuda.is_available():
             model = SentenceTransformer(model_name)
         else:
             model = SentenceTransformer(model_name, model_kwargs={"dtype": torch.float32})
