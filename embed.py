@@ -3,9 +3,11 @@ import sys
 import sqlite3
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
+import torch
 
 def main():
     print("start script")
+    print("Cuda available: ", torch.cuda.is_available())
 
     markdown_dir = Path("data/markdown")
     
@@ -50,7 +52,10 @@ def main():
     model_name = "clips/e5-base-trm-nl"
     print(f"Loading SentenceTransformer model for {model_name}...")
     try:
-        model = SentenceTransformer(model_name)
+        if torch.cuda.is_available()
+            model = SentenceTransformer(model_name)
+        else:
+            model = SentenceTransformer(model_name, model_kwargs={"dtype": torch.float32})
     except Exception as e:
         print(f"Error loading model: {e}")
         return
@@ -71,23 +76,23 @@ def main():
     except Exception as e:
         print(f"Error initializing SQLite database: {e}")
         return
-
+    
+    batch_size = 1000
     success_count = 0
-    for src_path in source_files:
-        if not src_path.is_file():
-            print(f"Warning: {src_path} is not a file.")
-            continue
 
-        try:
-            with open(src_path, "rt", encoding="utf-8") as f:
-                content = f.read()
+    print(f"Processing {len(source_files)} source files in batches of up to {batch_size}...")
 
-            embedding = model.encode_document(content)
-            embedding_blob = embedding.tobytes()
-            #print(embedding)
-            #print(embedding.shape)
-            #print(embedding.dtype)
-            #print(embedding_blob)
+    for i in range(0, len(source_files), batch_size):
+        batch_files = source_files[i:i + batch_size]
+        
+        batch_to_process = []
+        batch_ids = []
+        batch_contents = []
+
+        for src_path in batch_files:
+            if not src_path.is_file():
+                print(f"Warning: {src_path} is not a file.")
+                continue
 
             try:
                 article_id = int(src_path.stem)
@@ -101,16 +106,37 @@ def main():
                     print(f"Skipped {src_path}, embedding for ID {article_id} already exists in database")
                     continue
 
-            cursor.execute(f'''
-                INSERT OR REPLACE INTO "{model_name}" (id, embedding)
-                VALUES (?, ?)
-            ''', (article_id, embedding_blob))
-            conn.commit()
+            try:
+                with open(src_path, "rt", encoding="utf-8") as f:
+                    content = f.read()
+                batch_to_process.append(src_path)
+                batch_ids.append(article_id)
+                batch_contents.append(content)
+            except Exception as e:
+                print(f"Error reading {src_path}: {e}")
 
-            print(f"Embedded ID {article_id}: {src_path} -> table '{model_name}' (shape {embedding.shape})")
-            success_count += 1
+        if not batch_contents:
+            continue
+
+        print(f"Encoding batch of {len(batch_contents)} documents (items {i+1} to {i+len(batch_contents)})...")
+        try:
+            embeddings = model.encode_document(batch_contents, batch_size=128)
+            print("Storing batch")
+            for article_id, embedding, src_path in zip(batch_ids, embeddings, batch_to_process):
+                embedding_blob = embedding.tobytes()
+                cursor.execute(f'''
+                    INSERT OR REPLACE INTO "{model_name}" (id, embedding)
+                    VALUES (?, ?)
+                ''', (article_id, embedding_blob))
+                print(f"Embedded ID {article_id}: {src_path} -> table '{model_name}' (shape {embedding.shape})")
+                success_count += 1
+            conn.commit()
+            #from time import sleep
+            #sleep(5)
+            #print("oke")
+            
         except Exception as e:
-            print(f"Error processing {src_path}: {e}")
+            print(f"Error processing batch starting at index {i}: {e}")
 
     conn.close()
     print(f"\nSuccessfully smurfed (embedded) {success_count} files into {db_path} (table: {model_name}).")
