@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 from pathlib import Path
-import html2text
+from bs4 import BeautifulSoup
 
 def main():
     ongzip_dir = Path("data/ongzip")
@@ -57,7 +57,9 @@ def main():
         try:
             with open(src_path, "rt", encoding="utf-8") as f_in:
                 html_content = f_in.read()
-            markdown_content = html2text.html2text(html_content)
+            soup = BeautifulSoup(html_content, "html.parser")
+            main_tag = soup.find("main")
+            markdown_content = main_tag.get_text() if main_tag else ""
             with open(dest_path, "wt", encoding="utf-8") as f_out:
                 f_out.write(markdown_content)
             print(f"Converted: {src_path} -> {dest_path}")
