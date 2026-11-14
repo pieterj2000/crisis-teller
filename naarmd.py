@@ -2,6 +2,7 @@
 import sys
 from pathlib import Path
 from bs4 import BeautifulSoup
+import pypandoc
 
 def main():
     ongzip_dir = Path("data/ongzip")
@@ -59,7 +60,8 @@ def main():
                 html_content = f_in.read()
             soup = BeautifulSoup(html_content, "html.parser")
             main_tag = soup.find("main")
-            markdown_content = main_tag.get_text() if main_tag else ""
+            target_html = str(main_tag) if main_tag else html_content
+            markdown_content = pypandoc.convert_text(target_html, "plain", format="html")
             with open(dest_path, "wt", encoding="utf-8") as f_out:
                 f_out.write(markdown_content)
             print(f"Converted: {src_path} -> {dest_path}")

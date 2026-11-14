@@ -43,9 +43,11 @@ def main():
         print("No valid source files to process.")
         return
 
-    print("Loading tokenizer for pdelobelle/robbert-2026...")
+    print("Loading tokenizer for clips/e5-base-trm-nl...")
+    #print("Loading tokenizer for pdelobelle/robbert-2026...")
     try:
-        tokenizer = AutoTokenizer.from_pretrained("pdelobelle/robbert-2026", trust_remote_code=True)
+        #tokenizer = AutoTokenizer.from_pretrained("pdelobelle/robbert-2026", trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained("clips/e5-base-trm-nl", trust_remote_code=True)
     except Exception as e:
         print(f"Error loading tokenizer: {e}")
         return

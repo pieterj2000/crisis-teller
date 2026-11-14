@@ -1,16 +1,18 @@
 name: crisisteller
 channels:
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - python
   - requests
+  - pysocks
   - beautifulsoup4 
   - requests-ratelimiter
-  - html2text
+#  - html2text
   - transformers
   - pytorch
   - sentence-transformers
+  - pypandoc
 #  - pip
 #  - pip:
 #    - html2text
